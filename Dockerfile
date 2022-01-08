@@ -23,7 +23,6 @@ RUN pip install -r requirements.txt
 # Tests
 WORKDIR ${SRC_DIR}
 RUN python3 -m unittest
-RUN pytest
 
 # RUN
 CMD ["uvicorn", "endpoints:app", "--app-dir=/usr/bin/src/webapp/src/modules", "--reload", "--host", "0.0.0.0", "--port", "80"]
