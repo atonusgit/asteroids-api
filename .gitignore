@@ -1,0 +1,11 @@
+__pycache__
+.DS_Store
+.env
+*.rest
+.pytest_cache
+cache.json
+commands.txt
+.vscode
+ansible
+temp.json
+src/requirements.txt
