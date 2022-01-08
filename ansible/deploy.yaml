@@ -1,0 +1,37 @@
+---
+- name: Deploy Asteroids API
+  hosts: staging
+  remote_user: root
+  become: true
+  vars:
+  - docker_image_name: "asteroids-api:1"
+  - docker_container_name: "asteroids_api"
+  tasks:
+    - name: Pull asteroids-api repository
+      git:
+        repo: git@github.com:atonusgit/asteroids-api.git
+        dest: /srv/asteroids-api/
+        key_file: /root/.ssh/id_rsa
+        update: yes
+
+    - name: "Build docker image from Dockerfile"
+      docker_image:
+        name: "{{docker_image_name}}"
+        build:
+          path: "/srv/asteroids-api"
+        state: present
+        force_source: yes
+        source: build
+
+    - name: "Launch docker container"
+      docker_container:
+        name: "{{docker_container_name}}"
+        image: "{{docker_image_name}}"
+        restart: yes
+        state: started
+        env_file: "/srv/asteroids-api/.env"
+        ports:
+          - "8000:80"
+
+    - name: "Run endpoint tests"
+      command: "docker exec -it asteroids_api pytest"

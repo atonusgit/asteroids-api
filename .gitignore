@@ -6,6 +6,5 @@ __pycache__
 cache.json
 commands.txt
 .vscode
-ansible
 temp.json
 src/requirements.txt
