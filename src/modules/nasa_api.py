@@ -2,6 +2,7 @@ import os
 import cache
 import globals_vars
 from isoweek import Week
+from datetime import date, timedelta
 import concurrent.futures
 from dotenv import load_dotenv
 from typing import Optional, Dict, Any
@@ -79,13 +80,30 @@ class NasaApi:
 
         return near_earth_objects[self.closest_asteroid["date"]][self.closest_asteroid["index"]]
 
+    def remove_days_outside_scope(self, data: dict, start_date: date, end_date: date) -> dict:
+        delta = end_date - start_date
+        dates = list()
+        mid_date = start_date
+
+        for i in range(delta.days):
+            mid_date += timedelta(days=i)
+            if mid_date < end_date:
+                dates.append(mid_date.isoformat())
+
+        for data_date in data.copy().items():
+            if data_date[0] not in dates:
+                data.pop(data_date[0])
+
+        return data
+
     def get_closest_asteroid(self) -> dict:
-        start_date = "2015-12-19"
-        end_date = "2015-12-26"
+        start_date = date(2015, 12, 19)
+        end_date = date(2015, 12, 26)
 
         data = self.call_via_cache(
-            "dates", "feed", start_date, end_date, "near_earth_objects")
+            "dates", "feed", start_date.isoformat(), end_date.isoformat(), "near_earth_objects")
 
+        data = self.remove_days_outside_scope(data, start_date, end_date)
         closest_item = self.get_closest(data)
         closest_item_details = self.get_asteroid_details(closest_item["id"])
 
@@ -105,8 +123,8 @@ class NasaApi:
 
         for i in range(w1.last_week_of_year(year).week + 1):
             w2 = Week(year, 0) + i
-            start_date = w2.days()[0].strftime('%Y-%m-%d')
-            end_date = w2.days()[-1].strftime('%Y-%m-%d')
+            start_date = w2.days()[0].isoformat()
+            end_date = w2.days()[-1].isoformat()
             calls_params.append(["dates", "feed", start_date,
                                  end_date, "near_earth_objects"])
 
@@ -158,25 +176,51 @@ class NasaApi:
             "singles", 'neo/' + asteroid_id, asteroid_id)
         return asteroid_details
 
-    def call_via_cache(self, type: str, path: str, key: str, end_date: Optional[str] = None, data_key: Optional[str] = None) -> Any:
+    def call_via_cache(self, top_key: str, path: str, key: str, end_date: Optional[str] = None, data_key: Optional[str] = None) -> Any:
+        if globals_vars.cache.get(top_key, False) is False:
+            globals_vars.cache[top_key] = dict()
 
-        if globals_vars.cache.get(type, False) is False:
-            globals_vars.cache[type] = dict()
-
-        if key in globals_vars.cache[type]:
-            if type is "singles":
-                data = globals_vars.cache[type][key]
+        if key in globals_vars.cache[top_key]:
+            if top_key == "singles":
+                return globals_vars.cache[top_key][key].copy()
             else:
-                data = globals_vars.cache[type]
+                return globals_vars.cache[top_key].copy()
         else:
             data = self._call(path, key, end_date)
 
             if data_key:
-                globals_vars.cache[type] = globals_vars.cache[type] | data[data_key]
-                data = data[data_key]
+                reduced_data = self.reduce_response_data(data, data_key)
+                globals_vars.cache[top_key] = globals_vars.cache[top_key] | reduced_data[data_key]
+                data = reduced_data[data_key]
             else:
-                globals_vars.cache[type][key] = data
+                globals_vars.cache[top_key][key] = data
 
             cache.save_cache_file(globals_vars.cache)
 
         return data
+
+    def reduce_response_data(self, data: dict, data_key: str) -> dict:
+        reduced_data = dict()
+        reduced_data[data_key] = data[data_key].copy()
+
+        for date in data[data_key]:
+            reduced_data[data_key][date] = list()
+
+            for item in data[data_key][date]:
+                reduced_data[data_key][date].append({
+                    "id": item["id"],
+                    "estimated_diameter": {
+                        "meters": {
+                            "estimated_diameter_max": item["estimated_diameter"]["meters"]["estimated_diameter_max"]
+                        }
+                    },
+                    "close_approach_data": [
+                        {
+                            "miss_distance": {
+                                "kilometers": item["close_approach_data"][0]["miss_distance"]["kilometers"]
+                            }
+                        }
+                    ]
+                })
+
+        return reduced_data
