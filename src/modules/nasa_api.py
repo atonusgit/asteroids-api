@@ -177,5 +177,6 @@ class NasaApi:
             else:
                 globals_vars.cache[type][key] = data
 
-        cache.save_cache_file(globals_vars.cache)
+            cache.save_cache_file(globals_vars.cache)
+
         return data
