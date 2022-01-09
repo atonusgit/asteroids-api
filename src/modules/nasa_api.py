@@ -2,6 +2,7 @@ import os
 import cache
 import globals_vars
 from isoweek import Week
+import concurrent.futures
 from dotenv import load_dotenv
 from typing import Optional, Dict, Any
 from requests import Request, Session, Response
@@ -28,6 +29,7 @@ class NasaApi:
         self._session = Session()
 
     def _get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        print("request done")
         return self._request('GET', path, params=params)
 
     def _request(self, method: str, path: str, **kwargs) -> Any:
@@ -98,19 +100,22 @@ class NasaApi:
 
     def get_all_asteroids_of_year(self, year: int) -> dict:
         w1 = Week(year, 0)
-        near_earth_objects = {}
+        near_earth_objects = dict()
+        calls_params = list()
 
-        # run as many times as there are weeks in given year
-        # for i in range(w1.last_week_of_year(year).week + 1):
-        for i in range(2):
+        for i in range(w1.last_week_of_year(year).week + 1):
             w2 = Week(year, 0) + i
             start_date = w2.days()[0].strftime('%Y-%m-%d')
             end_date = w2.days()[-1].strftime('%Y-%m-%d')
+            calls_params.append(["dates", "feed", start_date,
+                                 end_date, "near_earth_objects"])
 
-            data = self.call_via_cache(
-                "dates", "feed", start_date, end_date, "near_earth_objects")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=53) as executor:
+            futures = [executor.submit(lambda p: self.call_via_cache(
+                *p), call_params) for call_params in calls_params]
 
-            near_earth_objects = near_earth_objects | data
+            for f in futures:
+                near_earth_objects = near_earth_objects | f.result()
 
         near_earth_objects = self.remove_days_from_other_years(
             year, near_earth_objects)
