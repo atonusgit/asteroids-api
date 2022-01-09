@@ -110,7 +110,7 @@ class NasaApi:
             calls_params.append(["dates", "feed", start_date,
                                  end_date, "near_earth_objects"])
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=53) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = [executor.submit(lambda p: self.call_via_cache(
                 *p), call_params) for call_params in calls_params]
 
