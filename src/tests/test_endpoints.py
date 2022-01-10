@@ -15,7 +15,7 @@ def test_get_root():
 
     # then
     assert response.status_code == 200
-    assert response.json() == globals_vars.root_msg
+    assert response.json() == [globals_vars.root_msg]
 
 
 def test_get_closest_asteroid():

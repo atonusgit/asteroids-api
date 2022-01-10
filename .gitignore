@@ -8,3 +8,4 @@ commands.txt
 .vscode
 temp.json
 src/requirements.txt
+venv

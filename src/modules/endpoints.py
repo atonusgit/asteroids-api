@@ -11,7 +11,7 @@ asteroid = Asteroid()
 
 @app.get("/")
 def hello():
-    return globals_vars.root_msg
+    return [globals_vars.root_msg]
 
 
 @app.get("/show-closest-asteroid")
