@@ -1,26 +1,27 @@
-import cache
-import nasa_api
-import globals_vars
 from fastapi import FastAPI
 
-n = nasa_api.NasaApi()
+import globals_vars
+from cache import Cache
+from asteroid import Asteroid
+
 app = FastAPI()
-cache = cache.Cache()
+cache = Cache()
+asteroid = Asteroid()
 
 
 @app.get("/")
 def hello():
-    return {"Hello world!"}
+    return globals_vars.root_msg
 
 
 @app.get("/show-closest-asteroid")
 def show_closest_asteroid():
-    return n.get_closest_asteroid()
+    return asteroid.get_closest_asteroid()
 
 
 @app.get("/show-largest-asteroid")
-def show_largest_asteroid(year: int = 2023):
-    return n.get_largest_asteroid(year)
+def show_largest_asteroid(year: int):
+    return asteroid.get_largest_asteroid(year)
 
 
 @app.get("/show-cache")

@@ -1,9 +1,10 @@
 import json
 import unittest
-from .context import nasa_api
+
+from .context import asteroid
 
 
-class TestNasaApi(unittest.TestCase):
+class TestAsteroid(unittest.TestCase):
 
     @staticmethod
     def get_temp_file() -> dict:
@@ -13,7 +14,7 @@ class TestNasaApi(unittest.TestCase):
 
     def test_get_closest(self):
         # given
-        n = nasa_api.NasaApi()
+        n = asteroid.Asteroid()
         temp_file = self.get_temp_file()["near_earth_objects"]
 
         # when
@@ -22,22 +23,9 @@ class TestNasaApi(unittest.TestCase):
         # then
         self.assertTrue(isinstance(result, dict))
 
-    def test_remove_days_from_other_years(self):
-        # given
-        n = nasa_api.NasaApi()
-        temp_file = self.get_temp_file()["near_earth_objects"]
-
-        # when
-        result = n.remove_days_from_other_years(
-            2015, temp_file)
-
-        # then
-        self.assertFalse("2016-01-02" in result.keys())
-        self.assertTrue("2015-12-25" in result.keys())
-
     def test_get_largest(self):
         # given
-        n = nasa_api.NasaApi()
+        n = asteroid.Asteroid()
         temp_file = self.get_temp_file()["near_earth_objects"]
 
         # when

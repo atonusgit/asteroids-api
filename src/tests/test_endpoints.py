@@ -1,5 +1,7 @@
-from .context import endpoints
 from fastapi.testclient import TestClient
+
+from .context import endpoints
+from .context import globals_vars
 
 client = TestClient(endpoints.app)
 
@@ -13,7 +15,7 @@ def test_get_root():
 
     # then
     assert response.status_code == 200
-    assert response.json() == ["Hello world!"]
+    assert response.json() == globals_vars.root_msg
 
 
 def test_get_closest_asteroid():
@@ -30,7 +32,7 @@ def test_get_closest_asteroid():
 
 def test_get_largest_asteroid():
     # given
-    route = "/show-largest-asteroid"
+    route = "/show-largest-asteroid?year=2022"
 
     # when
     response = client.get(route)

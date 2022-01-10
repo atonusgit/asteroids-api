@@ -1,7 +1,17 @@
 import os
 import json
 import pathlib
+
 import globals_vars
+
+#
+#   Cache has two parts - dict and json file.
+#   The cache.json, if available, is loaded to
+#   dict at start.
+#
+#   Handling cache dict is done with public
+#   function nasa_api.call_via_cache()
+#
 
 
 class Cache:
