@@ -4,11 +4,11 @@ Deliver asteroid info from Nasa API
 
 ## Demo
 
-See [http://5.22.220.90:8000/](5.22.220.90:8000)
+See [5.22.220.90:8000](http://5.22.220.90:8000)
 
 ## Requests
 
-Find all available requests at [http://5.22.220.90:8000/redoc](5.22.220.90:8000/redoc)
+Find all available requests at [5.22.220.90:8000/redoc](http://5.22.220.90:8000/redoc)
 
 ### Show closest asteroid
 
@@ -43,3 +43,24 @@ Demo site is deployed using ansible with
 ```sh
 ansible-playbook -i staging deploy.yaml
 ```
+
+## Local installation (Linux)
+
+Get your free Nasa API key from [api.nasa.gov](https://api.nasa.gov).
+
+```sh
+SECRET=<YOUR NASA API KEY>
+INSTALL="$HOME/.tmp"
+
+mkdir $INSTALL
+cd $INSTALL
+git clone git@github.com:atonusgit/asteroids-api.git
+cd asteroids-api
+sudo apt install docker
+sudo docker build . -t asteroids_api
+sudo docker run -p 8000:80 -e NASA_API_KEY=$SECRET asteroids_api
+```
+
+All set. Now you're ready to visit [localhost:8000](http://localhost:8000)
+
+For Windows and Mac users, install Docker via [Get Docker](https://docs.docker.com/get-docker/)
