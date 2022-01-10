@@ -8,6 +8,8 @@ See [http://5.22.220.90:8000/](5.22.220.90:8000)
 
 ## Requests
 
+Find all available requests at [http://5.22.220.90:8000/redoc](5.22.220.90:8000/redoc)
+
 ### Show closest asteroid
 
 Asteroid API uses fixed dates 19.12.2015 and 26.12.2015 and returns the details of the closest asteroid within that time period.
@@ -26,7 +28,7 @@ Cache has two parts - dictionary variable and cache.json file. The cache.json, i
 
 ## Environment
 
-Demo runs on docker, and within a python virtual environment.
+Demo runs on docker, and within a python virtual environment. .env file holds the Nasa API key.
 
 ## Tests
 

@@ -4,13 +4,21 @@ import globals_vars
 from cache import Cache
 from asteroid import Asteroid
 
-app = FastAPI()
+app = FastAPI(
+    title="Asteroids API",
+    description="Deliver asteroid info from Nasa API. See the detailed explanation in README.md via github link.",
+    version="0.0.1",
+    contact={
+        "name": "Anton Valle",
+        "url": "https://github.com/atonusgit/asteroids-api"
+    },
+)
 cache = Cache()
 asteroid = Asteroid()
 
 
 @app.get("/")
-def hello():
+def root():
     return [globals_vars.root_msg]
 
 
